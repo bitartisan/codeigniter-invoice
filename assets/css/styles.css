@@ -53,7 +53,7 @@ a#edit_client {
     margin-right: 20px;
     float: right;
     position: relative;
-    top: -32px;
+    top: -31px;
 }
 
 a#edit_client:hover {
@@ -70,8 +70,26 @@ select[multiple] option:checked {
     border-radius: 5px;
 }
 
+.table-lookup {
+    border-top: 3px solid #D1D6DB !important;
+}
+
+.table-lookup th {
+    color: #333;
+    background-color: #eee;
+}
+
 .alerts-container {
     min-height: 66px;
+}
+
+.alert p {
+    margin: 0;
+}
+
+.gj-datepicker-bootstrap [role=right-icon] button .gj-icon {
+    top: 5px;
+    left: 8px;
 }
 
 

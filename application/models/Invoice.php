@@ -16,8 +16,17 @@ class Invoice extends CI_Model {
     {
         if ($contract_id != null) {
             $this->db->order_by("invoice_no", "DESC");
-            $query = $this->db->get_where('INVOICE', array('contract_id' => $contract_id));
-            return $query->result_array();
+            $this->db->select("invoice_id, invoice_no, invoice_date");
+            $query = $this->db->get_where('invoice', array('contract_id' => $contract_id));
+
+            $data = [
+                '-1' => '-- New Invoice --',
+            ];
+            foreach ($query->result_array() as $row) {
+                $data[$row['invoice_id']] = '#' . $row['invoice_no'] . ' / ' . date($this->config->item('date_format'), strtotime($row['invoice_date']));
+            }
+
+            return $data;
         }
 
         return [];
@@ -52,7 +61,16 @@ class Invoice extends CI_Model {
         return [];
     }
 
-    public function generate_empty_line($contract_id, $invoice_id, $provider_id=1) {
+    public function get_last_invoice()
+    {
+        $query = $this->db->query('SELECT invoice_no, invoice_date FROM invoice ORDER BY invoice_id DESC LIMIT 1');
+        $result = $query->row_array();
+
+        return $result['invoice_no'] . ' / ' . date($this->config->item('date_format'), strtotime($result['invoice_date']));
+    }
+
+    public function generate_empty_line($contract_id, $invoice_id, $provider_id=1)
+    {
 
         // get contract
         $this->load->model('contract');
@@ -72,7 +90,8 @@ class Invoice extends CI_Model {
         return $empty_line;
     }
 
-    public function save_invoice($data) {
+    public function save_invoice($data)
+    {
 
         $invoice_id = $data['invoice']['invoice_id'];
         unset($data['invoice']['invoice_id']);
@@ -105,56 +124,77 @@ class Invoice extends CI_Model {
                 }
             }
 
-            $this->alert->set('alert-success', '<strong>Success:</strong> invoice has been successfully saved');
+            $save = [
+                'type' => 'alert-success',
+                'message' => '<strong>Success:</strong> invoice successfully saved',
+                'insert_id' => $invoice_id
+            ];
 
         } catch(Exception $e) {
-            $this->alert->set('alert-danger', '<strong>Error:</strong> ' . $e->getMessage());
+            $save = [
+                'type' => 'alert-danger',
+                'message' => '<strong>Error:</strong> ' . $e->getMessage(),
+                'insert_id' => -1
+            ];
         }
 
-        redirect('home?' . $this->get_url_request($data['contract']['client_id'], $data['contract']['contract_id'], $invoice_id) , 'location', 301);
+        return $save;
     }
 
-    public function delete_invoice($data) {
+    public function delete_invoice($data)
+    {
 
         try {
             $this->db->delete('invoice', array('invoice_id' =>  $data['invoice_id']));
             $this->db->delete('invoice_line', array('invoice_id' => $data['invoice_id']));
-
-            $this->alert->set('alert-success', '<strong>Success:</strong> invoice has been successfully deleted');
+            $success = [
+                'type' => 'alert-success',
+                'message' => '<strong>Success:</strong> invoice has been successfully deleted'
+            ];
         } catch(Exception $e) {
-            $this->alert->set('alert-danger', '<strong>Error:</strong> ' . $e->getMessage());
+            $success = [
+                'type' => 'alert-danger',
+                'message' => '<strong>Error:</strong> ' . $e->getMessage()
+            ];
         }
 
-        redirect('home?' . $this->get_url_request($data['client_id'], $data['contract_id']) , 'location', 301);
+        return $success;
     }
 
-    public function delete_invoice_line($data) {
+    public function delete_invoice_line($data)
+    {
 
         try {
             $this->db->delete('invoice_line', array('invoice_line_id' => $data['invoice_line_id']));
-
-            $this->alert->set('alert-success', '<strong>Success:</strong> invoice line has been successfully deleted');
+            $success = [
+                'type' => 'alert-success',
+                'message' => '<strong>Success:</strong> invoice line has been successfully deleted',
+            ];
         } catch(Exception $e) {
-            $this->alert->set('alert-danger', '<strong>Error:</strong> ' . $e->getMessage());
+            $success = [
+                'type' => 'alert-danger',
+                'message' => '<strong>Error:</strong> ' . $e->getMessage(),
+            ];
         }
 
-        redirect('home?' . $this->get_url_request($data['client_id'], $data['contract_id'], $data['invoice_id']) , 'location', 301);
+        return $success;
     }
 
-    public function get_url_request($client_id="", $contract_id="", $invoice_id="") {
+    public function get_url_request($client_id="", $contract_id="", $invoice_id="")
+    {
 
         $url = '';
         $sep = '&';
-        if ($this->input->get('client_id') || $client_id != "") {
+        if ($client_id !== false && ($this->input->get('client_id') || $client_id != "")) {
             $url .= 'client_id=' . ($this->input->get('client_id', true) == null ? $client_id : $this->input->get('client_id'));
         }
-        if ($this->input->get('contract_id') || $contract_id != "") {
+        if ($contract_id !== false && ($this->input->get('contract_id') || $contract_id != "")) {
             if ($url != "") {
                 $url .= $sep;
             }
             $url .= 'contract_id=' . ($this->input->get('contract_id', true) == null ? $contract_id : $this->input->get('contract_id'));
         }
-        if ($this->input->get('invoice_id') || $invoice_id != "") {
+        if ($invoice_id !== false && ($this->input->get('invoice_id') || $invoice_id != "")) {
             if ($url != "") {
                 $url .= $sep;
             }

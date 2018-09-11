@@ -15,8 +15,17 @@ class Service extends CI_Model {
 
     public function get_service()
     {
-        $query = $this->db->get('SERVICE');
+        $this->db->order_by("service_name", "ASC");
+        $this->db->select("service_id, service_name");
+        $query = $this->db->get("service");
 
-        return $query->result_array();
+        $data = [
+            '-1' => '-- Select Service --',
+        ];
+        foreach ($query->result_array() as $row) {
+            $data[$row['service_id']] = $row['service_name'];
+        }
+
+        return $data;
     }
 }

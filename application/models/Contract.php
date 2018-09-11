@@ -22,12 +22,21 @@ class Contract extends CI_Model {
             return $query->result_array();
         }
 
+        $this->db->order_by("contract_date", "DESC");
+        $this->db->select("contract_id, contract_no, contract_date");
         $query = $this->db->get_where('CONTRACT', array(
                                             'client_id' => $client_id,
                                             'provider_id' => $provider_id,
                                             'status' => $status)
                                     );
 
-        return $query->result_array();
+        $data = [
+            '-1' => '-- Select Contract --',
+        ];
+        foreach ($query->result_array() as $row) {
+            $data[$row['contract_id']] = '#' . $row['contract_no'] . ' / ' . date($this->config->item('date_format'), strtotime($row['contract_date']));
+        }
+
+        return $data;
     }
 }
