@@ -1,0 +1,82 @@
+/*
+red: #CB160B
+*/
+
+body {
+    font-family: 'Roboto', sans-serif !important;
+}
+
+main[role=main] {
+    padding: 80px 20px;
+}
+
+.navbar-brand {
+    color: #ccc !important;
+}
+
+nav.navbar li a {
+    font-size: 1.3rem;
+}
+
+nav.navbar li.active a {
+    color: #DC3545 !important;
+}
+
+a#login {
+    display: block;
+    margin: 100px auto;
+    width: 382px;
+    height: 92px;
+    background: #fff url('../img/btn_google_signin_light_normal_web@2x.png') no-repeat;
+    line-height: 0;
+    font-size: 0;
+    color: transparent;
+    opacity: 0.8;
+}
+
+a#login:hover {
+    opacity: 1;
+}
+
+a#login:active {
+    position: relative;
+    top: 1px;
+    left: 1px;
+}
+
+#invoicing dl dd {
+    margin-bottom: 0;
+    font-size: 0.8rem;
+}
+
+a#edit_client {
+    margin-right: 20px;
+    float: right;
+    position: relative;
+    top: -32px;
+}
+
+a#edit_client:hover {
+    opacity: 0.5;
+}
+
+#table-invoice {
+    border-radius: 5px;
+}
+
+select[multiple] option:checked {
+    padding: 2px 5px;
+    background: #E9C7CA linear-gradient(0deg, #E9C7CA 0%, #E9C7CA 100%);
+    border-radius: 5px;
+}
+
+.alerts-container {
+    min-height: 66px;
+}
+
+
+@media (max-width: 600px) {
+    .alerts-container {
+        min-height: 0;
+    }
+}
