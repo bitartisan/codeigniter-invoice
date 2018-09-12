@@ -1,6 +1,4 @@
 <?php
-echo validation_errors();
-
 $form_attr = [
     'name' => 'invoice',
     'id' => 'frm_invoice',
@@ -11,17 +9,16 @@ $form_attr = [
     <div class="row mx-lg-5">
         <div class="col-md-auto mr-auto col-md-3 col-xs-12">
             <h4 class="py-2">Provider</h4>
-            <?php $prov = $this->provider->get_provider(1); ?>
             <dl>
-                <dt><?=$prov['provider_name'];?></dt>
-                <dd>ORC: <?=$prov['provider_orc'];?></dd>
-                <dd>CIF: <?=$prov['provider_cui'];?></dd>
+                <dt><?=$app['provider']['provider_name'];?></dt>
+                <dd>ORC: <?=$app['provider']['provider_orc'];?></dd>
+                <dd>CIF: <?=$app['provider']['provider_cui'];?></dd>
                 <dd>Capital social: 200 RON</dd>
-                <dd>Sediu: <?=$prov['provider_address'];?></dd>
-                <dd>Cont: <?=$prov['provider_account'];?></dd>
-                <dd>Bank: <?=$prov['provider_bank'];?></dd>
+                <dd>Sediu: <?=$app['provider']['provider_address'];?></dd>
+                <dd>Cont: <?=$app['provider']['provider_account'];?></dd>
+                <dd>Bank: <?=$app['provider']['provider_bank'];?></dd>
             </dl>
-            <?=form_hidden('provider_id', $prov['provider_id']); ?>
+            <?=form_hidden('provider_id', $app['provider']['provider_id']); ?>
         </div>
         <div class="col-md-auto col-md-3 col-xs-12">
             <h4 class="py-2">Beneficiary</h4>
@@ -31,21 +28,19 @@ $form_attr = [
                 'class' => 'form-control form-control-sm my-1',
                 'onchange' => 'window.location=\'' . $app['base_url'] . 'index.php/home?client_id=\' + this.value;',
             ];
-            $clients = $this->client->get_client();
             ?>
 
-            <?=form_dropdown('client_id', $clients, $this->input->get('client_id', true), $client_attr);?>
+            <?=form_dropdown('client_id', $app['clients'], $app['client_id'], $client_attr);?>
             <?php if ($app['client_id'] != null && $app['client_id'] > 0): ?>
-                <?php $cl_arr = $this->client->get_client($app['client_id']); ?>
-                <a id="edit_client" href="<?=$app['base_url']; ?>index.php/client?id=<?=$cl_arr['client_id']; ?>" class="text-danger">
+                <a id="edit_client" href="<?= $app['base_url']; ?>index.php/client?id=<?= $app['client_id']; ?>" class="text-success">
                     <i class="fas fa-edit"></i>
                 </a>
                 <dl>
-                    <dt><?=$cl_arr['client_address'];?></dt>
-                    <dd>ORC: <?=$cl_arr['client_orc'];?></dd>
-                    <dd>CUI: <?=$cl_arr['client_cui'];?></dd>
-                    <dd>Cont: <?=$cl_arr['client_account'];?></dd>
-                    <dd>Bank: <?=$cl_arr['client_bank'];?></dd>
+                    <dt><?=$app['client_arr']['client_address'];?></dt>
+                    <dd>ORC: <?=$app['client_arr']['client_orc'];?></dd>
+                    <dd>CUI: <?=$app['client_arr']['client_cui'];?></dd>
+                    <dd>Cont: <?=$app['client_arr']['client_account'];?></dd>
+                    <dd>Bank: <?=$app['client_arr']['client_bank'];?></dd>
                 </dl>
             <?php endif; ?>
         </div>
@@ -63,30 +58,29 @@ $form_attr = [
                     'id' => 'contract_id',
                     'class' => 'form-control form-control-sm my-1',
                     'onchange' => 'window.location=\'' . $app['base_url'] . 'index.php/home?client_id=' . $app['client_id'] . '&amp;contract_id=\' + this.value;',
-                ];
-                $contracts = $this->contract->get_contract($app['client_id']); ?>
-                <?=form_dropdown('contract_id', $contracts, $this->input->get('contract_id', true), $contract_attr);?>
+                ]; ?>
+                <?=form_dropdown('contract_id', $app['contracts'], $app['contract_id'], $contract_attr);?>
             <?php endif; ?>
 
             <!-- invoice -->
             <?php if ($app['client_id'] != null && $app['contract_id'] != null): ?>
-                <small class="text-muted">Last invoice: #<?=$this->invoice->get_last_invoice(); ?></small>
+                <small class="text-muted">Last invoice: <?= $app['last_invoice']; ?></small>
                 <?php
                 $invoice_attr = [
                     'id' => 'invoice_id',
                     'class' => 'form-control form-control-sm my-1',
                     'size' => 10,
-                    'onchange' => 'window.location=\'' . $app['base_url'] . 'index.php/home?' . $this->invoice->get_url_request($app['client_id'], $app['contract_id'], false) . '&amp;invoice_id=\' + this.value;',
+                    'onchange' => 'window.location=\'' . $app['base_url'] . 'index.php/home?' . get_url_request($app['client_id'], $app['contract_id'], false) . '&amp;invoice_id=\' + this.value;',
                 ];
-                $invoice = $this->invoice->get_invoice_by_contract($app['contract_id']); ?>
-                <?=form_multiselect('invoice_id', $invoice, $this->input->get('invoice_id', true), $invoice_attr);?>
+                ?>
+                <?=form_multiselect('invoice_id', $app['invoice'], $app['invoice_id'], $invoice_attr);?>
             <?php endif; ?>
         </div>
         <div class="col-md-9 col-xs-12">
             <!-- invoice lines -->
             <?php if ($app['contract_id'] != null && $app['invoice_id'] != null): ?>
                 <div class="row my-4">
-                    <?php $sel_inv = $this->invoice->get_invoice($app['invoice_id']); ?>
+                    <?php $sel_inv = $app['sel_invoice']; ?>
                     <div class="offset-md-2 col-md-1 col-xs-12 mt-1">
                         <strong class="text-secondary">Invoice No.</strong>
                     </div>
@@ -125,27 +119,20 @@ $form_attr = [
                         </thead>
                         <tbody class="invoice-body">
                             <?php
-                            // check if we're adding a new empty invoice line
-                            $add_empty_line = false;
-                            if ($this->input->get('add_line')) {
-                                $add_empty_line = true;
-                            }
                             $total = 0;
-                            $lines_arr = $this->invoice->get_invoice_lines($app['invoice_id'], $add_empty_line);
-                            foreach($lines_arr as $index => $line):
+                            foreach($app['lines_arr'] as $index => $line):
                                 $total = $total + ($line['price'] * $line['qty']);
                                 ?>
                                 <tr>
                                     <td><?=$index+1; ?></td>
                                     <td>
-                                        <?php $services = $this->service->get_service(); ?>
                                         <!-- services -->
                                         <div class="row">
                                             <div class="col-xs-auto">
-                                                <?=form_dropdown('invoice_line[service_id][]', $services, $line['service_id'], ['class' => 'form-control form-control-sm']);?>
+                                                <?=form_dropdown('invoice_line[service_id][]', $app['services'], $line['service_id'], ['class' => 'form-control form-control-sm']);?>
                                             </div>
                                             <div class="col-xs-auto ml-2 mt-1">
-                                                conf. ctr. #<?=$line['contract_no']; ?> / <?=date('d.m.Y', strtotime($line['contract_date'])); ?>
+                                                conf. ctr. <?=$line['contract_no']; ?> / <?=date('d.m.Y', strtotime($line['contract_date'])); ?>
                                             </div>
                                         </div>
                                      </td>
@@ -160,11 +147,11 @@ $form_attr = [
                                         <!-- action buttons -->
                                         <?=form_hidden('invoice_line[invoice_line_id][]', $line['invoice_line_id']);?>
                                         <?php if ($index > 0): ?>
-                                            <a href="<?=base_url(); ?>index.php/form/delete_invoice_line?invoice_line_id=<?=$line['invoice_line_id']; ?>&amp;<?=$this->invoice->get_url_request(); ?>" onclick="return confirm('Are you sure you want do delete this line?');" class="btn bn-sm btn-danger">
+                                            <a href="<?=base_url(); ?>index.php/form/delete_invoice_line?invoice_line_id=<?=$line['invoice_line_id']; ?>&amp;<?= get_url_request(); ?>" onclick="return confirm('Are you sure you want do delete this line?');" class="btn bn-sm btn-danger">
                                                 <span class="fas fa-minus"></span>
                                             </a>
                                         <?php endif; ?>
-                                        <a href="<?=base_url(); ?>index.php/home?add_line=1&amp;<?=$this->invoice->get_url_request(); ?>" class="btn bn-sm btn-success">
+                                        <a href="<?=base_url(); ?>index.php/home?add_line=1&amp;<?= get_url_request(); ?>" class="btn bn-sm btn-success">
                                             <span class="fas fa-plus"></span>
                                         </a>
                                     </td>
@@ -185,7 +172,7 @@ $form_attr = [
                                                     <span class="fas fa-print"></span>
                                                     Print
                                                 </a>
-                                                <a href="<?=base_url(); ?>index.php/form/delete_invoice?<?=$this->invoice->get_url_request(); ?>" onclick="return confirm('Are you sure you want do delete this invoice?');" class="btn btn-sm btn-danger">
+                                                <a href="<?=base_url(); ?>index.php/form/delete_invoice?<?= get_url_request(); ?>" onclick="return confirm('Are you sure you want do delete this invoice?');" class="btn btn-sm btn-danger">
                                                     <span class="fas fa-trash"></span>
                                                     Delete
                                                 </a>

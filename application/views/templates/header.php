@@ -59,18 +59,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 <!-- Begin page content -->
 <main id="invoicing" role="main" class="container-fluid">
-
+<?php if(has_alert()): ?>
     <div class="row mx-md-5 alerts-container">
         <div class="col">
-            <?php if(has_alert()): ?>
-                <?php foreach(has_alert() as $type => $message): ?>
-                    <div class="alert <?php echo $type; ?> alert-dismissible fade show" role="alert">
-                        <?php echo $message; ?>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-    	        <?php endforeach; ?>
-            <?php endif; ?>
+            <?php foreach(has_alert() as $type => $message): ?>
+                <div class="alert <?php echo $type; ?> alert-dismissible fade show" role="alert">
+                    <?php echo $message; ?>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+	        <?php endforeach; ?>
         </div>
     </div>
+<?php endif; ?>

@@ -55,8 +55,9 @@ class Form extends CI_Controller {
         }
 
         $this->alert->set($save['type'], $save['message']);
-        redirect('home?' . $this->invoice->get_url_request($form['client_id'], $form['contract_id'],  $save['insert_id']) , 'location', 301);
+        redirect('home?' . get_url_request($form['client_id'], $form['contract_id'],  $save['insert_id']) , 'location', 301);
         die();
+
     }
 
     function delete_invoice() {
@@ -71,8 +72,9 @@ class Form extends CI_Controller {
         $success = $this->invoice->delete_invoice($data);
 
         $this->alert->set($success['type'], $success['message']);
-        redirect('home?' . $this->invoice->get_url_request($data['client_id'], $data['contract_id']) , 'location', 301);
+        redirect('home?' . get_url_request($data['client_id'], $data['contract_id']) , 'location', 301);
         die();
+
     }
 
     function delete_invoice_line() {
@@ -88,7 +90,51 @@ class Form extends CI_Controller {
         $success = $this->invoice->delete_invoice_line($data);
 
         $this->alert->set($success['type'], $success['message']);
-        redirect('home?' . $this->invoice->get_url_request($data['client_id'], $data['contract_id'], $data['invoice_id']) , 'location', 301);
+        redirect('home?' . get_url_request($data['client_id'], $data['contract_id'], $data['invoice_id']) , 'location', 301);
         die();
+
+    }
+
+    function save_client() {
+
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('client_name', '<strong>Client name</strong>', 'required');
+        $this->form_validation->set_rules('client_email', '<strong>Client email</strong>', 'required');
+        $this->form_validation->set_rules('client_address', '<strong>Client address</strong>', 'required');
+        $this->form_validation->set_rules('client_orc', '<strong>ORC number</strong>', 'required');
+        $this->form_validation->set_rules('client_cui', '<strong>CUI number</strong>', 'required');
+        $this->form_validation->set_rules('client_bank', '<strong>Client Bank</strong>', 'required');
+        $this->form_validation->set_rules('client_account', '<strong>Client account</strong>', 'required');
+
+        $form = $this->input->post();
+
+        if ($this->form_validation->run() != false)
+        {
+            $this->load->model('client');
+            $success = $this->client->save_client($form);
+        } else
+        {
+            $success = [
+                'insert_id' => ($form['client_id'] ? $form['client_id'] : -1),
+                'type' => 'alert-danger',
+                'message' => '<strong>Error:</strong>' . validation_errors()
+            ];
+        }
+
+        $this->alert->set($success['type'], $success['message']);
+        redirect('client_form?client_id=' . $success['insert_id'] , 'location', 301);
+        die();
+
+    }
+
+    function delete_client() {
+
+        $this->load->model('client');
+        $success = $this->client->delete_client($this->input->get('client_id', true));
+
+        $this->alert->set($success['type'], $success['message']);
+        redirect('client' , 'location', 301);
+        die();
+
     }
 }

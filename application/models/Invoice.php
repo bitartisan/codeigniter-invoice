@@ -179,28 +179,4 @@ class Invoice extends CI_Model {
 
         return $success;
     }
-
-    public function get_url_request($client_id="", $contract_id="", $invoice_id="")
-    {
-
-        $url = '';
-        $sep = '&';
-        if ($client_id !== false && ($this->input->get('client_id') || $client_id != "")) {
-            $url .= 'client_id=' . ($this->input->get('client_id', true) == null ? $client_id : $this->input->get('client_id'));
-        }
-        if ($contract_id !== false && ($this->input->get('contract_id') || $contract_id != "")) {
-            if ($url != "") {
-                $url .= $sep;
-            }
-            $url .= 'contract_id=' . ($this->input->get('contract_id', true) == null ? $contract_id : $this->input->get('contract_id'));
-        }
-        if ($invoice_id !== false && ($this->input->get('invoice_id') || $invoice_id != "")) {
-            if ($url != "") {
-                $url .= $sep;
-            }
-            $url .= 'invoice_id=' . ($this->input->get('invoice_id', true) == null ? $invoice_id : $this->input->get('invoice_id'));
-        }
-
-        return $url;
-    }
 }

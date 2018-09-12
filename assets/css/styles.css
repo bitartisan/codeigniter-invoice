@@ -19,7 +19,7 @@ nav.navbar li a {
 }
 
 nav.navbar li.active a {
-    color: #DC3545 !important;
+    color: #007BFF !important;
 }
 
 a#login {
@@ -62,6 +62,13 @@ a#edit_client:hover {
 
 #table-invoice {
     border-radius: 5px;
+}
+
+.form-data label {
+    display: block;
+    text-align: right;
+    text-transform: capitalize;
+    color: #777;
 }
 
 select[multiple] option:checked {
